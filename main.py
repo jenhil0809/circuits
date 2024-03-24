@@ -46,6 +46,7 @@ Wire("2D", "7A", bars)
 Wire("8D", "7A", bars)
 Wire("8D", "7B", bars)
 Wire("6C", "5-", bars)
+Wire("6C", "5+", bars)
 for bar in bars:
     bar.change_power()
 for bar in bars:
