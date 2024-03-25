@@ -36,7 +36,7 @@ class Bar:
         return None
 
 bars = []
-for i in range(10):
+for i in range(30):
     bars.append(Bar(i))
 
 Wire("3A", "2B", bars)
