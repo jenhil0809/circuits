@@ -11,6 +11,7 @@ class Bar:
         self.number = number
         self.wires = []
         self.power = [None, None]
+        self.bars = []
 
     def add_wire(self, wire):
         self.wires.append(wire)
@@ -29,26 +30,43 @@ class Bar:
                 return wire
             if wire.end[-1] == symbol and int(wire.start[:-1]) == self.number:
                 return wire
-            if int(wire.start[:-1]) not in checked and wire.end[-1] not in "+-" and bars[int(wire.start[:-1])].check_power(symbol, checked):
+            if int(wire.start[:-1]) not in checked and wire.end[-1] not in "+-" and self.bars[
+                int(wire.start[:-1])].check_power(symbol, checked):
                 return wire
-            if int(wire.end[:-1]) not in checked and wire.end[-1] not in "+-" and bars[int(wire.end[:-1])].check_power(symbol, checked):
+            if int(wire.end[:-1]) not in checked and wire.end[-1] not in "+-" and self.bars[
+                int(wire.end[:-1])].check_power(symbol, checked):
                 return wire
         return None
 
-bars = []
-for i in range(30):
-    bars.append(Bar(i))
 
-Wire("3A", "2B", bars)
-Wire("3B", "1+", bars)
-Wire("2C", "5-", bars)
-Wire("2D", "7A", bars)
-Wire("8D", "7A", bars)
-Wire("8D", "7B", bars)
-Wire("6C", "5-", bars)
-Wire("6C", "5+", bars)
-for bar in bars:
-    bar.change_power()
-for bar in bars:
-    if None not in bar.power:
-        print(bar.number)
+class Sim:
+    def __init__(self, num_bars):
+        self.bars = [Bar(i) for i in range(num_bars)]
+        for bar in self.bars:
+            bar.bars = self.bars
+
+    def add_wire(self, start, end):
+        Wire(start, end, self.bars)
+
+    def powered_bars(self):
+        for bar in self.bars:
+            bar.change_power()
+        return [bar.number for bar in self.bars if None not in bar.power]
+
+
+if __name__ == "__main__":
+    sim = Sim(30)
+    sim.add_wire("3A", "2B")
+    print(sim.powered_bars())
+    sim.add_wire("3B", "1+")
+    print(sim.powered_bars())
+    sim.add_wire("2C", "5-")
+    print(sim.powered_bars())
+    sim.add_wire("2D", "7A")
+    print(sim.powered_bars())
+    sim.add_wire("8D", "7B")
+    print(sim.powered_bars())
+    sim.add_wire("6C", "5+")
+    print(sim.powered_bars())
+    sim.add_wire("6C", "5-")
+    print(sim.powered_bars())
