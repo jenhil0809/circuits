@@ -1,4 +1,5 @@
 import tkinter as tk
+import main
 
 
 class GameApp(tk.Tk):
@@ -18,25 +19,35 @@ class Game(tk.Frame):
     def __init__(self, master):
         super().__init__()
         self.master: GameApp = master
+        self.sim = main.Sim(30)
         self.canvas = tk.Canvas(self)
         self.canvas.pack(fill=tk.BOTH, expand=1)
         self.canvas.create_image(0, 0, anchor=tk.NW, image=master.background_image)
     def draw_line(self, x1, x2, y1, y2):
         if y1 < 0 and y2 < 0:
             print("Error:only one end may be +/-")
+            y1, y2 = "-", "+"
         elif y1 == -1:
             line = self.canvas.create_line(x1*10+20, y1*10+30, x2*10+20, y2*10+60, fill="red", width=2)
-            print(y1)
+            y1 = "-"
         elif y2 == -1:
             line = self.canvas.create_line(x1*10+20, y1*10+60, x2*10+20, y2*10+30, fill="red", width=2)
+            y2 = "-"
         elif y1 == -2:
-            print(y1)
             line = self.canvas.create_line(x1*10+20, y1*10+50, x2*10+20, y2*10+60, fill="red", width=2)
+            y1 = "+"
         elif y2 == -2:
             line = self.canvas.create_line(x1*10+20, y1*10+60, x2*10+20, y2*10+50, fill="red", width=2)
+            y2 = "+"
         else:
-            print(y1)
             line = self.canvas.create_line(x1*10+20, y1*10+60, x2*10+20, y2*10+60, fill="red", width=2)
+        if (y1, y2) != ("-", "+"):
+            if type(y1) == int:
+                y1 =chr(74-y1)
+            if type(y2) == int:
+                y2 =chr(74-y2)
+            self.sim.add_wire(str(x1)+y1, str(x2)+y2)
+            print(self.sim.powered_bars())
 
 
 class Inputs(tk.Frame):
