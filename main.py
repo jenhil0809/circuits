@@ -5,6 +5,19 @@ class Wire:
         bars[int(start[0])].add_wire(self)
         bars[int(end[0])].add_wire(self)
 
+class Bulb(Wire):
+    def __init__(self, start, end, bars):
+        super().__init__(start, end, bars)
+        self.bars = bars
+        self.on = False
+        self.check_status()
+
+    def check_status(self):
+        if None not in self.bars[int(self.start[0])].power and None not in self.bars[int(self.start[0])].power:
+            self.on = True
+        else:
+            self.on = False
+
 
 class Bar:
     def __init__(self, number):
@@ -48,6 +61,9 @@ class Sim:
     def add_wire(self, start, end):
         Wire(start, end, self.bars)
 
+    def add_bulb(self, start, end):
+        Bulb(start, end, self.bars)
+
     def powered_bars(self):
         for bar in self.bars:
             bar.change_power()
@@ -58,7 +74,7 @@ if __name__ == "__main__":
     sim = Sim(30)
     sim.add_wire("3A", "2B")
     print(sim.powered_bars())
-    sim.add_wire("3B", "1+")
+    sim.add_bulb("3B", "1+")
     print(sim.powered_bars())
     sim.add_wire("2C", "5-")
     print(sim.powered_bars())

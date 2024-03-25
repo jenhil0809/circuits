@@ -9,6 +9,7 @@ class GameApp(tk.Tk):
         self.col1 = tk.IntVar()
         self.row2 = tk.IntVar()
         self.col2 = tk.IntVar()
+        self.typ = tk.StringVar()
         self.background_image=tk.PhotoImage(file="breadboard.png")
         self.game = Game(self)
         self.game.pack()
@@ -23,28 +24,32 @@ class Game(tk.Frame):
         self.canvas = tk.Canvas(self)
         self.canvas.pack(fill=tk.BOTH, expand=1)
         self.canvas.create_image(0, 0, anchor=tk.NW, image=master.background_image)
-    def draw_line(self, x1, x2, y1, y2):
+    def draw_line(self, x1, x2, y1, y2, type):
+        if type == "wire":
+            col = "black"
+        else:
+            col = "red"
         if y1 < 0 and y2 < 0:
             print("Error:only one end may be +/-")
             y1, y2 = "-", "+"
         elif y1 == -1:
-            line = self.canvas.create_line(x1*10+20, y1*10+30, x2*10+20, y2*10+60, fill="red", width=2)
+            line = self.canvas.create_line(x1*10+20, y1*10+30, x2*10+20, y2*10+60, fill=col, width=2)
             y1 = "-"
         elif y2 == -1:
-            line = self.canvas.create_line(x1*10+20, y1*10+60, x2*10+20, y2*10+30, fill="red", width=2)
+            line = self.canvas.create_line(x1*10+20, y1*10+60, x2*10+20, y2*10+30, fill=col, width=2)
             y2 = "-"
         elif y1 == -2:
-            line = self.canvas.create_line(x1*10+20, y1*10+50, x2*10+20, y2*10+60, fill="red", width=2)
+            line = self.canvas.create_line(x1*10+20, y1*10+50, x2*10+20, y2*10+60, fill=col, width=2)
             y1 = "+"
         elif y2 == -2:
-            line = self.canvas.create_line(x1*10+20, y1*10+60, x2*10+20, y2*10+50, fill="red", width=2)
+            line = self.canvas.create_line(x1*10+20, y1*10+60, x2*10+20, y2*10+50, fill=col, width=2)
             y2 = "+"
         else:
-            line = self.canvas.create_line(x1*10+20, y1*10+60, x2*10+20, y2*10+60, fill="red", width=2)
+            line = self.canvas.create_line(x1*10+20, y1*10+60, x2*10+20, y2*10+60, fill=col, width=2)
         if (y1, y2) != ("-", "+"):
-            if type(y1) == int:
+            if str(y1) not in "+-":
                 y1 =chr(74-y1)
-            if type(y2) == int:
+            if str(y2) not in "+-":
                 y2 =chr(74-y2)
             self.sim.add_wire(str(x1)+y1, str(x2)+y2)
             print(self.sim.powered_bars())
@@ -70,8 +75,9 @@ class Inputs(tk.Frame):
         self.row2_input = tk.Scale(self, from_=-2, to=4, orient="horizontal", variable=master.row2, showvalue=False, command=lambda slider:scale_labels(master.row2.get(), self.row2_input))
         self.col1_input = tk.Scale(self, from_=1, to=30, orient="horizontal", variable=master.col1)
         self.col2_input = tk.Scale(self, from_=1, to=30, orient="horizontal", variable=master.col2)
+        self.type_input = tk.OptionMenu(self, master.typ, "wire", "bulb")
         self.submit_button = tk.Button(self, text="Add wire", command=lambda: self.master.game.draw_line(
-            master.col1.get(),master.col2.get(), master.row1.get(), master.row2.get()))
+            master.col1.get(),master.col2.get(), master.row1.get(), master.row2.get(), master.typ.get()))
         self.place_widgets()
 
     def place_widgets(self):
@@ -81,7 +87,8 @@ class Inputs(tk.Frame):
         self.row2_input.grid(row=3, column=1)
         self.col1_input.grid(row=1, column=0)
         self.col2_input.grid(row=3, column=0)
-        self.submit_button.grid(row=4, column=11)
+        self.submit_button.grid(row=4, column=1)
+        self.type_input.grid(row=4, column=0)
 
 
 if __name__ == "__main__":
