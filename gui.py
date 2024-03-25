@@ -22,18 +22,43 @@ class Game(tk.Frame):
         self.canvas.pack(fill=tk.BOTH, expand=1)
         self.canvas.create_image(0, 0, anchor=tk.NW, image=master.background_image)
     def draw_line(self, x1, x2, y1, y2):
-        line = self.canvas.create_line(x1*10+30, y1*10+60, x2*10+30, y2*10+60, fill="red", width=2)
-        print(x1, x2, y1, y2)
+        if y1 < 0 and y2 < 0:
+            print("Error:only one end may be +/-")
+        elif y1 == -1:
+            line = self.canvas.create_line(x1*10+20, y1*10+30, x2*10+20, y2*10+60, fill="red", width=2)
+            print(y1)
+        elif y2 == -1:
+            line = self.canvas.create_line(x1*10+20, y1*10+60, x2*10+20, y2*10+30, fill="red", width=2)
+        elif y1 == -2:
+            print(y1)
+            line = self.canvas.create_line(x1*10+20, y1*10+50, x2*10+20, y2*10+60, fill="red", width=2)
+        elif y2 == -2:
+            line = self.canvas.create_line(x1*10+20, y1*10+60, x2*10+20, y2*10+50, fill="red", width=2)
+        else:
+            print(y1)
+            line = self.canvas.create_line(x1*10+20, y1*10+60, x2*10+20, y2*10+60, fill="red", width=2)
 
 
 class Inputs(tk.Frame):
     def __init__(self, master: GameApp):
         super().__init__()
         self.master: GameApp = master
-        self.row1_input = tk.Scale(self, from_=0, to=4, orient="horizontal", variable=master.row1)
-        self.row2_input = tk.Scale(self, from_=0, to=4, orient="horizontal", variable=master.row2)
-        self.col1_input = tk.Scale(self, from_=0, to=9, orient="horizontal", variable=master.col1)
-        self.col2_input = tk.Scale(self, from_=0, to=9, orient="horizontal", variable=master.col2)
+        SCALE_LABELS = {
+            -2: "+",
+            -1: "-",
+            0: "j",
+            1: "i",
+            2: "h",
+            3: "g",
+            4: "f"
+        }
+        def scale_labels(value, slider):
+            slider.config(label=SCALE_LABELS[int(value)])
+
+        self.row1_input = tk.Scale(self, from_=-2, to=4, orient="horizontal", variable=master.row1, showvalue=False, command=lambda slider:scale_labels(master.row1.get(), self.row1_input))
+        self.row2_input = tk.Scale(self, from_=-2, to=4, orient="horizontal", variable=master.row2, showvalue=False, command=lambda slider:scale_labels(master.row2.get(), self.row2_input))
+        self.col1_input = tk.Scale(self, from_=1, to=30, orient="horizontal", variable=master.col1)
+        self.col2_input = tk.Scale(self, from_=1, to=30, orient="horizontal", variable=master.col2)
         self.submit_button = tk.Button(self, text="Add wire", command=lambda: self.master.game.draw_line(
             master.col1.get(),master.col2.get(), master.row1.get(), master.row2.get()))
         self.place_widgets()
