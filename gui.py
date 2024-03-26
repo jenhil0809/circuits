@@ -10,11 +10,14 @@ class GameApp(tk.Tk):
         self.row2 = tk.IntVar()
         self.col2 = tk.IntVar()
         self.typ = tk.StringVar()
-        self.background_image=tk.PhotoImage(file="breadboard.png")
+        self.bulbs = []
+        self.sim_obj = []
+        self.background_image = tk.PhotoImage(file="breadboard.png")
         self.game = Game(self)
         self.game.pack()
         self.inputs = Inputs(self)
         self.inputs.pack()
+
 
 class Game(tk.Frame):
     def __init__(self, master):
@@ -24,35 +27,63 @@ class Game(tk.Frame):
         self.canvas = tk.Canvas(self)
         self.canvas.pack(fill=tk.BOTH, expand=1)
         self.canvas.create_image(0, 0, anchor=tk.NW, image=master.background_image)
-    def draw_line(self, x1, x2, y1, y2, type):
+
+    def add_line(self, x1, x2, y1, y2, type):
+        valid = True
         if type == "wire":
             col = "black"
+        elif type == "bulb":
+            col = "DarkRed"
         else:
-            col = "red"
+            valid = False
+            print("Error: select a component type")
         if y1 < 0 and y2 < 0:
+            valid = False
             print("Error:only one end may be +/-")
             y1, y2 = "-", "+"
-        elif y1 == -1:
-            line = self.canvas.create_line(x1*10+20, y1*10+30, x2*10+20, y2*10+60, fill=col, width=2)
-            y1 = "-"
+        if valid:
+            self.master.bulbs.append([x1, y1, x2, y2, col, type])
+            if y1 >= 0:
+                y1 = chr(74 - y1)
+            if y2 >= 0:
+                y2 = chr(74 - y2)
+            if y1 == -2:
+                y1 = "+"
+            elif y1 == -1:
+                y1 = "-"
+            if y2 == -2:
+                y2 = "+"
+            elif y2 == -1:
+                y2 = "-"
+            if type == "wire":
+                self.sim.add_wire(str(x1) + str(y1), str(x2) + str(y2))
+            elif type == "bulb":
+                self.sim.add_bulb(str(x1) + str(y1), str(x2) + str(y2))
+        self.redraw()
+
+    def redraw(self):
+        print(self.sim.components, self.master.bulbs)
+        self.canvas.delete("all")
+        self.canvas.create_image(0, 0, anchor=tk.NW, image=self.master.background_image)
+        self.sim.powered_bars()
+        for i in range(len(self.sim.components)):
+            print(self.master.sim_obj, self.master.bulbs)
+            if self.master.bulbs[i][-1] == "bulb" and self.sim.components[i].check_status():
+                self.master.bulbs[i][4] = "red"
+                print(self.sim.components[i].check_status())
+            self.draw_line(*self.master.bulbs[i][:-1])
+
+    def draw_line(self, x1, y1, x2, y2, col):
+        if y1 == -1:
+            self.canvas.create_line(x1 * 10 + 20, y1 * 10 + 30, x2 * 10 + 20, y2 * 10 + 60, fill=col, width=2)
         elif y2 == -1:
-            line = self.canvas.create_line(x1*10+20, y1*10+60, x2*10+20, y2*10+30, fill=col, width=2)
-            y2 = "-"
+            self.canvas.create_line(x1 * 10 + 20, y1 * 10 + 60, x2 * 10 + 20, y2 * 10 + 30, fill=col, width=2)
         elif y1 == -2:
-            line = self.canvas.create_line(x1*10+20, y1*10+50, x2*10+20, y2*10+60, fill=col, width=2)
-            y1 = "+"
+            self.canvas.create_line(x1 * 10 + 20, y1 * 10 + 50, x2 * 10 + 20, y2 * 10 + 60, fill=col, width=2)
         elif y2 == -2:
-            line = self.canvas.create_line(x1*10+20, y1*10+60, x2*10+20, y2*10+50, fill=col, width=2)
-            y2 = "+"
+            self.canvas.create_line(x1 * 10 + 20, y1 * 10 + 60, x2 * 10 + 20, y2 * 10 + 50, fill=col, width=2)
         else:
-            line = self.canvas.create_line(x1*10+20, y1*10+60, x2*10+20, y2*10+60, fill=col, width=2)
-        if (y1, y2) != ("-", "+"):
-            if str(y1) not in "+-":
-                y1 =chr(74-y1)
-            if str(y2) not in "+-":
-                y2 =chr(74-y2)
-            self.sim.add_wire(str(x1)+y1, str(x2)+y2)
-            print(self.sim.powered_bars())
+            self.canvas.create_line(x1 * 10 + 20, y1 * 10 + 60, x2 * 10 + 20, y2 * 10 + 60, fill=col, width=2)
 
 
 class Inputs(tk.Frame):
@@ -68,16 +99,19 @@ class Inputs(tk.Frame):
             3: "g",
             4: "f"
         }
+
         def scale_labels(value, slider):
             slider.config(label=SCALE_LABELS[int(value)])
 
-        self.row1_input = tk.Scale(self, from_=-2, to=4, orient="horizontal", variable=master.row1, showvalue=False, command=lambda slider:scale_labels(master.row1.get(), self.row1_input))
-        self.row2_input = tk.Scale(self, from_=-2, to=4, orient="horizontal", variable=master.row2, showvalue=False, command=lambda slider:scale_labels(master.row2.get(), self.row2_input))
+        self.row1_input = tk.Scale(self, from_=-2, to=4, orient="horizontal", variable=master.row1, showvalue=False,
+                                   command=lambda slider: scale_labels(master.row1.get(), self.row1_input))
+        self.row2_input = tk.Scale(self, from_=-2, to=4, orient="horizontal", variable=master.row2, showvalue=False,
+                                   command=lambda slider: scale_labels(master.row2.get(), self.row2_input))
         self.col1_input = tk.Scale(self, from_=1, to=30, orient="horizontal", variable=master.col1)
         self.col2_input = tk.Scale(self, from_=1, to=30, orient="horizontal", variable=master.col2)
         self.type_input = tk.OptionMenu(self, master.typ, "wire", "bulb")
-        self.submit_button = tk.Button(self, text="Add wire", command=lambda: self.master.game.draw_line(
-            master.col1.get(),master.col2.get(), master.row1.get(), master.row2.get(), master.typ.get()))
+        self.submit_button = tk.Button(self, text="Add wire", command=lambda: self.master.game.add_line(
+            master.col1.get(), master.col2.get(), master.row1.get(), master.row2.get(), master.typ.get()))
         self.place_widgets()
 
     def place_widgets(self):

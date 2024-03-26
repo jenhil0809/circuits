@@ -17,6 +17,7 @@ class Bulb(Wire):
             self.on = True
         else:
             self.on = False
+        return self.on
 
 
 class Bar:
@@ -55,14 +56,15 @@ class Bar:
 class Sim:
     def __init__(self, num_bars):
         self.bars = [Bar(i) for i in range(num_bars)]
+        self.components = []
         for bar in self.bars:
             bar.bars = self.bars
 
     def add_wire(self, start, end):
-        Wire(start, end, self.bars)
+        self.components.append(Wire(start, end, self.bars))
 
     def add_bulb(self, start, end):
-        Bulb(start, end, self.bars)
+        self.components.append(Bulb(start, end, self.bars))
 
     def powered_bars(self):
         for bar in self.bars:
@@ -73,16 +75,10 @@ class Sim:
 if __name__ == "__main__":
     sim = Sim(30)
     sim.add_wire("3A", "2B")
-    print(sim.powered_bars())
     sim.add_bulb("3B", "1+")
-    print(sim.powered_bars())
     sim.add_wire("2C", "5-")
-    print(sim.powered_bars())
-    sim.add_wire("2D", "7A")
-    print(sim.powered_bars())
-    sim.add_wire("8D", "7B")
-    print(sim.powered_bars())
-    sim.add_wire("6C", "5+")
-    print(sim.powered_bars())
-    sim.add_wire("6C", "5-")
+    #sim.add_wire("2D", "7A")
+    #sim.add_wire("8D", "7B")
+    #sim.add_wire("6C", "5+")
+    #sim.add_wire("6C", "5-")
     print(sim.powered_bars())
