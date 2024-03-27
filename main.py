@@ -13,7 +13,8 @@ class Bulb(Wire):
         self.check_status()
 
     def check_status(self):
-        if None not in self.bars[int(self.start[0])].power and None not in self.bars[int(self.start[0])].power:
+        print(self.bars[int(self.start[:-1])].power, self.bars[int(self.end[:-1])].power)
+        if None not in self.bars[int(self.start[:-1])].power and None not in self.bars[int(self.end[:-1])].power:
             self.on = True
         else:
             self.on = False

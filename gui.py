@@ -62,15 +62,13 @@ class Game(tk.Frame):
         self.redraw()
 
     def redraw(self):
-        print(self.sim.components, self.master.bulbs)
         self.canvas.delete("all")
         self.canvas.create_image(0, 0, anchor=tk.NW, image=self.master.background_image)
-        self.sim.powered_bars()
         for i in range(len(self.sim.components)):
-            print(self.master.sim_obj, self.master.bulbs)
             if self.master.bulbs[i][-1] == "bulb" and self.sim.components[i].check_status():
                 self.master.bulbs[i][4] = "red"
-                print(self.sim.components[i].check_status())
+            elif self.master.bulbs[i][-1] == "bulb":
+                self.master.bulbs[i][4] = "DarkRed"
             self.draw_line(*self.master.bulbs[i][:-1])
 
     def draw_line(self, x1, y1, x2, y2, col):
