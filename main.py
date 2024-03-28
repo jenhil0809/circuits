@@ -68,9 +68,10 @@ class Sim:
         self.components.append(Bulb(start, end, self.bars))
 
     def powered_bars(self):
-        for bar in self.bars:
-            bar.change_power()
-        return [bar.number for bar in self.bars if None not in bar.power]
+        for i in range(len(self.bars)):
+            for bar in self.bars:
+                bar.change_power()
+            return [bar.number for bar in self.bars if None not in bar.power]
 
 
 if __name__ == "__main__":
